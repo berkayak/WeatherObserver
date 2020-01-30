@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class Sys(
     @SerializedName("type")
     val type: Int,
-    @SerializedName("id")
+    @SerializedName("Id")
     val id: Int,
     @SerializedName("country")
     val country: String,

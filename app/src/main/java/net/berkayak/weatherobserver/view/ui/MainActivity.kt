@@ -8,34 +8,32 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import net.berkayak.weatherobserver.R
 import net.berkayak.weatherobserver.service.model.InstantWeatherDBO
 import net.berkayak.weatherobserver.viewmodel.InstantWeatherViewModel
-import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
-import android.util.Log
-import androidx.core.app.ActivityCompat
+import android.widget.*
+import net.berkayak.weatherobserver.utilities.Const
 import net.berkayak.weatherobserver.view.callback.ViewModelCallback
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var saveBtn: Button
+    lateinit var listBtn: Button
     lateinit var cityRB: RadioButton
     lateinit var locationRB: RadioButton
     lateinit var cityET: EditText
+    lateinit var porgres: ProgressBar
+    var goDetailActivation = false
 
     lateinit var weatherVM : InstantWeatherViewModel
 
-    private val REQ_CODE_ACCESS_COARSE_LOCATION = 401
+    private val REQ_CODE_ACCESS_FINE_LOCATION = 401
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int,permissions: Array<out String>,grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQ_CODE_ACCESS_COARSE_LOCATION){
+        if (requestCode == REQ_CODE_ACCESS_FINE_LOCATION){
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 doViaGPS()
             else{
@@ -56,16 +54,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun init(){
         saveBtn = findViewById(R.id.save_Btn)
+        listBtn = findViewById(R.id.list_Btn)
         cityRB = findViewById(R.id.city_name_RB)
         locationRB = findViewById(R.id.gps_location_RB)
         cityET = findViewById(R.id.city_name_ET)
+        porgres = findViewById(R.id.progress_PB)
+        saveBtn.setOnClickListener(saveListener)
+        listBtn.setOnClickListener(listListener)
 
         weatherVM = ViewModelProviders.of(this).get(InstantWeatherViewModel::class.java)
         weatherVM.getAll().observe(this, weatherObserver)
     }
 
     private var weatherObserver = Observer<List<InstantWeatherDBO>> {
-
+        if (goDetailActivation){
+            var lastRecord = it[it.lastIndex]
+            startDetailActivity(lastRecord)
+            goDetailActivation = false
+        }
     }
 
     private var saveListener = View.OnClickListener {
@@ -76,8 +82,8 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(baseContext, R.string.empty_fields, Toast.LENGTH_LONG).show()
             return@OnClickListener
         } else if(locationRB.isChecked){ //location radio checked
-            if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), REQ_CODE_ACCESS_COARSE_LOCATION)
+            if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQ_CODE_ACCESS_FINE_LOCATION)
             } else{
                 doViaGPS()
             }
@@ -86,32 +92,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var listListener = View.OnClickListener {
+        startListActivity()
+    }
+
     private var insertCallback = object : ViewModelCallback {
         override fun onComplete(id: Long) {
-            var lastRecord = weatherVM.getAll().value?.find { t -> t.id.toLong() == id }
-            if (lastRecord != null)
-                Log.i("EFECTURA", lastRecord.temp.toString())
-            else
-                Log.d("EFECTURA", "null object reference")
+            goDetailActivation = true
+            runOnUiThread { porgres.visibility = View.GONE }
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun doViaGPS(){
         var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
             Toast.makeText(baseContext, R.string.enbale_gps, Toast.LENGTH_LONG).show()
-            val intent = Intent(ACTION_LOCATION_SOURCE_SETTINGS)
-            startActivity(intent)
         }
 
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
-            object : LocationListener {
+        porgres.visibility = View.VISIBLE
+
+        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, object : LocationListener {
                 override fun onLocationChanged(p0: Location?) {
-                    weatherVM.addViaNetwork(p0?.latitude!!, p0?.longitude!!, insertCallback, onComplete = {
-                        if (!it)
-                            Toast.makeText(baseContext, R.string.error, Toast.LENGTH_LONG).show()
-                    })
+                    weatherVM.addViaNetwork(p0?.latitude!!, p0?.longitude!!, insertCallback, onComp)
+                    porgres.visibility = View.GONE
                 }
 
                 override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
@@ -126,15 +130,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun doViaCity(cityName: String){
-        weatherVM.addViaNetwork(cityName, insertCallback, onComplete = {
-            if (!it)
-                Toast.makeText(baseContext, R.string.error, Toast.LENGTH_LONG).show()
-        })
+        porgres.visibility = View.VISIBLE
+        weatherVM.addViaNetwork(cityName, insertCallback, onComplete = onComp)
+    }
+
+    private fun startDetailActivity(lastRecord: InstantWeatherDBO){
+        var detailIntent = Intent(this@MainActivity, WeatherDetailActivity::class.java)
+        detailIntent.putExtra(Const.WEATHER_OBJECT, lastRecord)
+        startActivity(detailIntent)
+    }
+
+    private fun startListActivity(){
+        var recordsIntent = Intent(this@MainActivity, RecordsActivity::class.java)
+        startActivity(recordsIntent)
     }
 
 
-
-
-
+    private val onComp: (Boolean) -> Unit = {
+        if (!it)
+            Toast.makeText(baseContext, R.string.error, Toast.LENGTH_LONG).show()
+        else
+            Toast.makeText(baseContext, R.string.completed, Toast.LENGTH_LONG).show()
+    }
 
 }

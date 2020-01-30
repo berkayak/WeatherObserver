@@ -44,11 +44,11 @@ class WeatherAdapter(val context: Context, private var list: List<InstantWeather
 
         fun bindItem(item: InstantWeatherDBO){
             //bind fields
-            icon.loadViaNetwork(WeatherServiceManager.getPhotoJPEG(item.icon))
-            time.text = item.insertTime.toDateFormat(null)
-            recordId.text = item.id.toString()
+            icon.loadViaNetwork(WeatherServiceManager.getPhotoJPEG(item.Icon))
+            time.text = item.InsertTime.toDateFormat(null)
+            recordId.text = item.Id.toString()
             location.text = item.city + ", " + item.country
-            temp.text = item.temp.toInt().toString()
+            temp.text = item.temp.toInt().toString() + "°C"
 
             //onClick event
             if (::notifier.isInitialized)

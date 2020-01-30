@@ -9,4 +9,6 @@
     <string name="enbale_gps">You should enable GPS</string>
     <string name="error">Error!</string>
     <string name="need_permission">Need permission!</string>
+    <string name="list">List</string>
+    <string name="completed">Completed!</string>
 </resources>

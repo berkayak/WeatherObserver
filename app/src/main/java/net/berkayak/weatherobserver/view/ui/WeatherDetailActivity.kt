@@ -38,10 +38,10 @@ class WeatherDetailActivity : AppCompatActivity() {
     }
 
     fun putFields(ob: InstantWeatherDBO){
-        iconIV.loadViaNetwork(WeatherServiceManager.getPhotoJPEG(ob.icon))
+        iconIV.loadViaNetwork(WeatherServiceManager.getPhotoJPEG(ob.Icon))
         locationTV.text = ob.city + ", " + ob.country
-        tempTV.text = ob.temp.toString() + "°C, " + ob.weatherDesc
+        tempTV.text = ob.temp.toInt().toString() + "°C, " + ob.weatherDesc
         coordinatesTV.text = "Lat: ${ob.lat}, Lon: ${ob.lon}"
-        insertTimeTV.text = ob.insertTime.toDateFormat(null)
+        insertTimeTV.text = ob.InsertTime.toDateFormat(null)
     }
 }

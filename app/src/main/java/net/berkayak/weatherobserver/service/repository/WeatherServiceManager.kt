@@ -20,7 +20,7 @@ class WeatherServiceManager {
         }
 
         fun getPhotoJPEG(str: String): String{
-            return "http://openweathermap.org/img/w/${str}.png"
+            return "https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/widgets/${str}.png"
         }
     }
 }
