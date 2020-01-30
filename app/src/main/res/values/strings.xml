@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">WeatherObserver</string>
+    <string name="with_city_name">With City Name</string>
+    <string name="city_name">City Name...</string>
+    <string name="with_gps_location">With GPS Location</string>
+    <string name="save">Save</string>
+    <string name="chekc_any">Check any choice!</string>
+    <string name="empty_fields">Fill the empty fields!</string>
+    <string name="enbale_gps">You should enable GPS</string>
+    <string name="error">Error!</string>
+    <string name="need_permission">Need permission!</string>
 </resources>

@@ -22,12 +22,6 @@ class WeatherRepository {
         }.start()
     }
 
-    fun update(w: InstantWeatherDBO){
-        Thread{
-            dao.update(w)
-        }.start()
-    }
-
     fun delete(w: InstantWeatherDBO){
         Thread{
             dao.delete(w)

@@ -14,7 +14,7 @@ import net.berkayak.weatherobserver.utilities.loadViaNetwork
 import net.berkayak.weatherobserver.utilities.toDateFormat
 
 
-class WeatherAdapter(val context: Context, val list: List<InstantWeatherDBO>): RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() {
+class WeatherAdapter(val context: Context, private var list: List<InstantWeatherDBO>): RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() {
     lateinit var notifier: WeatherListListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherViewHolder {
@@ -27,6 +27,11 @@ class WeatherAdapter(val context: Context, val list: List<InstantWeatherDBO>): R
 
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
         holder.bindItem(list[position])
+    }
+
+    fun updateDataSet(l: List<InstantWeatherDBO>){
+        this.list = l
+        notifyDataSetChanged()
     }
 
 

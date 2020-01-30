@@ -21,10 +21,6 @@ class InstantWeatherViewModel(application: Application): AndroidViewModel(applic
         repo.insert(w, callback)
     }
 
-    fun update(w: InstantWeatherDBO){
-        repo.update(w)
-    }
-
     fun delete(w: InstantWeatherDBO){
         repo.delete(w)
     }
