@@ -28,10 +28,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var cityRB: RadioButton
     lateinit var locationRB: RadioButton
     lateinit var cityET: EditText
-    lateinit var porgres: ProgressBar
-    var goDetailActivation = false
-
+    lateinit var progress: ProgressBar
     lateinit var weatherVM : InstantWeatherViewModel
+    var goDetailActivation = false
 
     private val REQ_CODE_ACCESS_FINE_LOCATION = 401
 
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         cityRB = findViewById(R.id.city_name_RB)
         locationRB = findViewById(R.id.gps_location_RB)
         cityET = findViewById(R.id.city_name_ET)
-        porgres = findViewById(R.id.progress_PB)
+        progress = findViewById(R.id.progress_PB)
         saveBtn.setOnClickListener(saveListener)
         listBtn.setOnClickListener(listListener)
 
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity() {
     private var insertCallback = object : ViewModelCallback {
         override fun onComplete(id: Long) {
             goDetailActivation = true
-            runOnUiThread { porgres.visibility = View.GONE }
+            runOnUiThread { progress.visibility = View.GONE }
         }
     }
 
@@ -110,12 +109,12 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(baseContext, R.string.enbale_gps, Toast.LENGTH_LONG).show()
         }
 
-        porgres.visibility = View.VISIBLE
+        progress.visibility = View.VISIBLE
 
         locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, object : LocationListener {
                 override fun onLocationChanged(p0: Location?) {
                     weatherVM.addViaNetwork(p0?.latitude!!, p0?.longitude!!, insertCallback, onComp)
-                    porgres.visibility = View.GONE
+                    progress.visibility = View.GONE
                 }
 
                 override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
@@ -130,7 +129,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun doViaCity(cityName: String){
-        porgres.visibility = View.VISIBLE
+        progress.visibility = View.VISIBLE
         weatherVM.addViaNetwork(cityName, insertCallback, onComplete = onComp)
     }
 

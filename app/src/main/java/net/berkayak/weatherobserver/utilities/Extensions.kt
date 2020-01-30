@@ -17,7 +17,7 @@ fun Long.toDateFormat(format: String?): String{
         if(format != null){
             SimpleDateFormat(format).format(this)
         } else {
-            SimpleDateFormat("dd/MM/yyyy hh:mm").format(this)
+            SimpleDateFormat("dd/MM/yyyy HH:mm").format(this)
         }
     } catch (e: Exception){
         "01/01/1900 00:00"
