@@ -18,8 +18,11 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.widget.*
+import androidx.lifecycle.ViewModelProvider
 import net.berkayak.weatherobserver.utilities.Const
 import net.berkayak.weatherobserver.view.callback.ViewModelCallback
+import net.berkayak.weatherobserver.viewmodel.dag.DaggerAppComponent
+import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,8 +32,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var locationRB: RadioButton
     lateinit var cityET: EditText
     lateinit var progress: ProgressBar
-    lateinit var weatherVM : InstantWeatherViewModel
     var goDetailActivation = false
+
+    @Inject
+    lateinit var vmFactory: ViewModelProvider.Factory
+
+    lateinit var weatherVM : InstantWeatherViewModel
+
+
 
     private val REQ_CODE_ACCESS_FINE_LOCATION = 401
 
@@ -38,6 +47,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         init()
+
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,permissions: Array<out String>,grantResults: IntArray) {
@@ -61,7 +72,9 @@ class MainActivity : AppCompatActivity() {
         saveBtn.setOnClickListener(saveListener)
         listBtn.setOnClickListener(listListener)
 
-        weatherVM = ViewModelProviders.of(this).get(InstantWeatherViewModel::class.java)
+
+        DaggerAppComponent.builder().build().inject(this)
+        weatherVM = ViewModelProviders.of(this, vmFactory).get(InstantWeatherViewModel::class.java)
         weatherVM.getAll().observe(this, weatherObserver)
     }
 
@@ -153,3 +166,5 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
+
+

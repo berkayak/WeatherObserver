@@ -26,4 +26,23 @@ class ExampleUnitTest {
         assertEquals("30/01/2020 17:09", formatted)
 
     }
+
+    @Test
+    fun fourt(){
+        val number = 77
+
+        var left = number
+        var digit = 0
+
+        var i = 0
+        while (i > 4) {
+            println("i:$i")
+            digit = left % 2
+            left = left / 2
+            i++
+            System.out.println("i: " + i + ", digit: " + digit + ", left: " + left);
+        }
+
+        assertEquals(digit, 1)
+    }
 }

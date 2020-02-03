@@ -1,8 +1,8 @@
 package net.berkayak.weatherobserver.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import net.berkayak.weatherobserver.service.model.InstantWeather
 import net.berkayak.weatherobserver.service.model.InstantWeatherDBO
 import net.berkayak.weatherobserver.service.repository.WeatherRepository
@@ -12,10 +12,16 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
+import javax.inject.Inject
 
-class InstantWeatherViewModel(application: Application): AndroidViewModel(application) {
-    private val repo = WeatherRepository(application.baseContext)
-    private var list = repo.getAll()
+class InstantWeatherViewModel: ViewModel {
+    private lateinit var repo : WeatherRepository
+    private lateinit var list :LiveData<List<InstantWeatherDBO>>
+
+    @Inject
+    constructor(): super()
+
+
 
     fun insert(w: InstantWeatherDBO, callback: ViewModelCallback?){
         repo.insert(w, callback)
