@@ -7,6 +7,7 @@ import net.berkayak.weatherobserver.service.model.InstantWeatherDBO
 import net.berkayak.weatherobserver.service.repository.WeatherRepository
 import net.berkayak.weatherobserver.service.repository.WeatherServiceManager
 import net.berkayak.weatherobserver.view.callback.ViewModelCallback
+import net.berkayak.weatherobserver.view.ui.di.CoreApp
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -14,8 +15,8 @@ import java.util.*
 
 class InstantWeatherViewModel: ViewModel() {
 
-    private lateinit var repo : WeatherRepository
-    private lateinit var list :LiveData<List<InstantWeatherDBO>>
+    private var repo : WeatherRepository = WeatherRepository(CoreApp.coreComponent.context())
+    private var list : LiveData<List<InstantWeatherDBO>> = repo.getAll()
 
     fun insert(w: InstantWeatherDBO, callback: ViewModelCallback?){
         repo.insert(w, callback)
