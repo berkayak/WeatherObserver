@@ -18,10 +18,10 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.widget.*
-import androidx.lifecycle.ViewModelProvider
 import net.berkayak.weatherobserver.utilities.Const
 import net.berkayak.weatherobserver.view.callback.ViewModelCallback
-import net.berkayak.weatherobserver.viewmodel.dag.DaggerAppComponent
+import net.berkayak.weatherobserver.view.ui.di.ComponentBuilds
+import net.berkayak.weatherobserver.view.ui.di.WDViewModelFactory
 import javax.inject.Inject
 
 
@@ -33,21 +33,25 @@ class MainActivity : AppCompatActivity() {
     lateinit var cityET: EditText
     lateinit var progress: ProgressBar
     var goDetailActivation = false
+    private val REQ_CODE_ACCESS_FINE_LOCATION = 401
+
+
+    private val component by lazy { ComponentBuilds.wdComponent()}
 
     @Inject
-    lateinit var vmFactory: ViewModelProvider.Factory
+    lateinit var viewModelFactory: WDViewModelFactory
 
-    lateinit var weatherVM : InstantWeatherViewModel
+    private val viewModel: InstantWeatherViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(InstantWeatherViewModel::class.java)
+    }
 
 
-
-    private val REQ_CODE_ACCESS_FINE_LOCATION = 401
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         setContentView(R.layout.activity_main)
         init()
-
 
     }
 
@@ -72,10 +76,7 @@ class MainActivity : AppCompatActivity() {
         saveBtn.setOnClickListener(saveListener)
         listBtn.setOnClickListener(listListener)
 
-
-        DaggerAppComponent.builder().build().inject(this)
-        weatherVM = ViewModelProviders.of(this, vmFactory).get(InstantWeatherViewModel::class.java)
-        weatherVM.getAll().observe(this, weatherObserver)
+        viewModel.getAll().observe(this, weatherObserver)
     }
 
     private var weatherObserver = Observer<List<InstantWeatherDBO>> {
@@ -126,7 +127,7 @@ class MainActivity : AppCompatActivity() {
 
         locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, object : LocationListener {
                 override fun onLocationChanged(p0: Location?) {
-                    weatherVM.addViaNetwork(p0?.latitude!!, p0?.longitude!!, insertCallback, onComp)
+                    viewModel.addViaNetwork(p0?.latitude!!, p0?.longitude!!, insertCallback, onComp)
                     progress.visibility = View.GONE
                 }
 
@@ -143,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun doViaCity(cityName: String){
         progress.visibility = View.VISIBLE
-        weatherVM.addViaNetwork(cityName, insertCallback, onComplete = onComp)
+        viewModel.addViaNetwork(cityName, insertCallback, onComplete = onComp)
     }
 
     private fun startDetailActivity(lastRecord: InstantWeatherDBO){
